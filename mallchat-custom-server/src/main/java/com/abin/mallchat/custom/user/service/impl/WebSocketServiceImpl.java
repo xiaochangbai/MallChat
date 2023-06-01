@@ -3,6 +3,8 @@ package com.abin.mallchat.custom.user.service.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.abin.mallchat.common.common.config.ThreadPoolConfig;
 import com.abin.mallchat.common.common.event.UserOfflineEvent;
@@ -15,6 +17,7 @@ import com.abin.mallchat.custom.user.domain.vo.request.ws.WSAuthorize;
 import com.abin.mallchat.custom.user.domain.vo.response.ws.WSBaseResp;
 import com.abin.mallchat.custom.user.service.LoginService;
 import com.abin.mallchat.custom.user.service.WebSocketService;
+import com.abin.mallchat.custom.user.service.WxMsgService;
 import com.abin.mallchat.custom.user.service.adapter.WSAdapter;
 import com.abin.mallchat.custom.user.websocket.NettyUtil;
 import io.netty.channel.Channel;
@@ -32,6 +35,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -78,6 +82,11 @@ public class WebSocketServiceImpl implements WebSocketService {
     @Autowired
     private UserCache userCache;
 
+    @Autowired
+    private WxMsgService wxMsgService;
+
+    private AtomicInteger atomicInteger = new AtomicInteger();
+
     /**
      * 处理用户登录请求，需要返回一张带code的二维码
      *
@@ -92,6 +101,23 @@ public class WebSocketServiceImpl implements WebSocketService {
         WxMpQrCodeTicket wxMpQrCodeTicket = wxMpService.getQrcodeService().qrCodeCreateTmpTicket(code, EXPIRE_SECONDS);
         //返回给前端
         sendMsg(channel, WSAdapter.buildLoginResp(wxMpQrCodeTicket));
+    }
+
+
+    /**
+     * 游客登录
+     *
+     * @param channel
+     */
+    @Override
+    public void touristLogin(Channel channel,String data){
+        JSONObject jsonObject = JSONUtil.parseObj(data);
+        String userName = jsonObject.getStr("userName");
+        Integer code = generateLoginCode(channel);
+        if(StrUtil.isEmpty(userName)){
+            userName = "游客-"+atomicInteger.getAndIncrement();
+        }
+        wxMsgService.loginByUserName(userName,code);
     }
 
     /**

@@ -93,6 +93,21 @@ public class WxMsgService {
         login(user.getId(), eventKey);
     }
 
+    public void loginByUserName(String userName,Integer chanelCode){
+        User user = userDao.getByName(userName);
+        //更新用户信息
+        if (user==null) {
+            user = new User();
+            user.setAvatar("https://yearning.igxiaodi.com/front/assets/logo.c4f26e9f.png");
+            user.setName(userName);
+            user.setSex(2);
+            user.setOpenId(userName);
+            userDao.save(user);
+        }
+        //触发用户登录成功操作
+        login(user.getId(), chanelCode);
+    }
+
     private void fillUserInfo(Long uid, WxOAuth2UserInfo userInfo) {
         User update = UserAdapter.buildAuthorizeUser(uid, userInfo);
         for (int i = 0; i < 5; i++) {

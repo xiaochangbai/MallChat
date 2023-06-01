@@ -60,4 +60,10 @@ public interface WebSocketService {
     void sendToAllOnline(WSBaseResp wsBaseResp, Long skipUid);
 
 
+    /**
+     * 游客登录
+     *
+     * @param channel
+     */
+    void touristLogin(Channel channel,String userName);
 }
