@@ -97,6 +97,9 @@ public class NettyWebSocketServerHandler extends SimpleChannelInboundHandler<Tex
             case TOURIST_LOGIN:
                 getService().touristLogin(ctx.channel(),wsBaseReq.getData());
                 break;
+            case GITEE_LOGIN:
+                getService().giteeLogin(ctx.channel(),wsBaseReq.getData());
+                break;
             default:
                 log.info("未知类型");
         }

@@ -94,6 +94,18 @@ public class User implements Serializable {
     @TableField("update_time")
     private Date updateTime;
 
+    @TableField("gitee_id")
+    private String giteeId;
+
+    @TableField("email")
+    private String email;
+
+
+    @TableField("other")
+    private String other;
+
+
+
     public void refreshIp(String ip) {
         if (ipInfo == null) {
             ipInfo = new IpInfo();

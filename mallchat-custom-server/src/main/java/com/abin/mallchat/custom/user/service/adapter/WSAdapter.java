@@ -48,6 +48,13 @@ public class WSAdapter {
         return wsBaseResp;
     }
 
+    public static WSBaseResp<String> buildErrorResp(String msg){
+        WSBaseResp wsBaseResp = new WSBaseResp();
+        wsBaseResp.setType(WSRespTypeEnum.Error.getType());
+        wsBaseResp.setData(msg);
+        return wsBaseResp;
+    }
+
     public static WSBaseResp buildScanSuccessResp() {
         WSBaseResp wsBaseResp = new WSBaseResp();
         wsBaseResp.setType(WSRespTypeEnum.LOGIN_SCAN_SUCCESS.getType());

@@ -5,7 +5,7 @@
     <parent>
         <artifactId>mallchat</artifactId>
         <groupId>com.abin.mallchat</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -16,6 +16,17 @@
             <groupId>com.abin.mallchat</groupId>
             <artifactId>mallchat-common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.houbb</groupId>
+            <artifactId>sensitive-word</artifactId>
+            <version>0.2.1</version>
+        </dependency>
+
     </dependencies>
 
     <build>

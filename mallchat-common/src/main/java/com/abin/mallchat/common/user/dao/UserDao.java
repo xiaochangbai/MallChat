@@ -40,4 +40,8 @@ public class UserDao extends ServiceImpl<UserMapper, User> {
     public User getByName(String name) {
         return lambdaQuery().eq(User::getName, name).one();
     }
+
+    public User getGiteeId(String giteeId) {
+        return lambdaQuery().eq(User::getGiteeId, giteeId).one();
+    }
 }

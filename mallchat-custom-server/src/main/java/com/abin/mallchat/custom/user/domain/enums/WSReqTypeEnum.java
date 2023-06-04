@@ -21,6 +21,7 @@ public enum WSReqTypeEnum {
     AUTHORIZE(3, "登录认证"),
 
     TOURIST_LOGIN(4, "游客登录"),
+    GITEE_LOGIN(5, "gitee登录"),
     ;
 
     private final Integer type;

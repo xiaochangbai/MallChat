@@ -5,11 +5,15 @@ import com.abin.mallchat.common.user.dao.UserDao;
 import com.abin.mallchat.common.user.domain.entity.User;
 import com.abin.mallchat.custom.user.service.adapter.TextBuilder;
 import com.abin.mallchat.custom.user.service.adapter.UserAdapter;
+import com.alibaba.fastjson.JSONObject;
+import com.github.houbb.sensitive.word.core.SensitiveWordHelper;
+import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlOutMessage;
+import me.zhyd.oauth.model.AuthUser;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -93,16 +97,52 @@ public class WxMsgService {
         login(user.getId(), eventKey);
     }
 
+    public void loginGitee(Channel channel, AuthUser authUser){
+        String uuid = authUser.getUuid();
+        User user = userDao.getGiteeId(uuid);
+        //更新用户信息
+        boolean insertFlag = false;
+        if (user==null) {
+            user = new User();
+            insertFlag= true;
+        }
+        user.setAvatar(authUser.getAvatar());
+        user.setName(authUser.getUsername());
+        user.setSex(2);
+        user.setGiteeId(uuid);
+        user.setEmail(authUser.getEmail());
+        user.setOther(JSONObject.toJSONString(authUser.getRawUserInfo()));
+
+        if(insertFlag){
+            userDao.save(user);
+        }else{
+            userDao.updateById(user);
+        }
+
+        //调用用户登录模块
+        String token = loginService.login(user.getId());
+        //推送前端登录成功
+        webSocketService.loginSuccess(channel, user, token);
+
+    }
+
     public void loginByUserName(String userName,Integer chanelCode){
+        if(SensitiveWordHelper.contains(userName)){
+            webSocketService.sendErrorMsg(chanelCode,"用户名不可用");
+            return;
+        }
         User user = userDao.getByName(userName);
         //更新用户信息
         if (user==null) {
             user = new User();
-            user.setAvatar("https://yearning.igxiaodi.com/front/assets/logo.c4f26e9f.png");
+//            user.setAvatar("https://foruda.gitee.com/avatar/1677025717892030465/4904154_xiaochangbai_1656836733.png!avatar200");
             user.setName(userName);
             user.setSex(2);
             user.setOpenId(userName);
             userDao.save(user);
+        }else{
+            webSocketService.sendErrorMsg(chanelCode,"用户名已存在");
+            return;
         }
         //触发用户登录成功操作
         login(user.getId(), chanelCode);

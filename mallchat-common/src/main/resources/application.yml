@@ -12,7 +12,7 @@ mybatis-plus:
 spring:
   profiles:
     #运行的环境
-    active: my-prod
+    active: local
   application:
     name: mallchat
   datasource:
@@ -63,3 +63,9 @@ wx:
         secret: ${mallchat.wx.secret} # 公众号的appsecret
         token: ${mallchat.wx.token} # 接口配置里的Token值
         aesKey: ${mallchat.wx.aesKey} # 接口配置里的EncodingAESKey值
+
+other:
+  autho2:
+    clientId: ${other.autho2.clientId}
+    clientSecret: ${other.autho2.clientSecret}
+    redirectUri: ${other.autho2.redirectUri}

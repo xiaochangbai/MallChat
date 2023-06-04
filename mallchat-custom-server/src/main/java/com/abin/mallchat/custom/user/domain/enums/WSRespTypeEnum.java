@@ -24,6 +24,9 @@ public enum WSRespTypeEnum {
     ONLINE_OFFLINE_NOTIFY(5, "上下线通知", WSOnlineOfflineNotify.class),
     INVALIDATE_TOKEN(6, "使前端的token失效，意味着前端需要重新登录", null),
     BLACK(7, "拉黑用户", WSBlack.class),
+
+    GiteeLoginReponseURl(8, "gitee login url", WSBlack.class),
+    Error(9, "Error", WSBlack.class),
     ;
 
     private final Integer type;

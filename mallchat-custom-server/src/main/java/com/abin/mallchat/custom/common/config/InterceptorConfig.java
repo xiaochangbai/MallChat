@@ -26,10 +26,13 @@ public class InterceptorConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(tokenInterceptor)
+                .excludePathPatterns("/capi/connect/**")
                 .addPathPatterns("/capi/**");
         registry.addInterceptor(collectorInterceptor)
+                .excludePathPatterns("/capi/connect/**")
                 .addPathPatterns("/capi/**");
         registry.addInterceptor(blackInterceptor)
+                .excludePathPatterns("/capi/connect/**")
                 .addPathPatterns("/capi/**");
     }
 }

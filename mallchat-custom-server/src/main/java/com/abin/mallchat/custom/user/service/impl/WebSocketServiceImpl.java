@@ -11,8 +11,10 @@ import com.abin.mallchat.common.common.event.UserOfflineEvent;
 import com.abin.mallchat.common.common.event.UserOnlineEvent;
 import com.abin.mallchat.common.user.dao.UserDao;
 import com.abin.mallchat.common.user.domain.entity.User;
+import com.abin.mallchat.common.user.login.utils.OauthLoginUtils;
 import com.abin.mallchat.common.user.service.cache.UserCache;
 import com.abin.mallchat.custom.user.domain.dto.ws.WSChannelExtraDTO;
+import com.abin.mallchat.custom.user.domain.enums.WSRespTypeEnum;
 import com.abin.mallchat.custom.user.domain.vo.request.ws.WSAuthorize;
 import com.abin.mallchat.custom.user.domain.vo.response.ws.WSBaseResp;
 import com.abin.mallchat.custom.user.service.LoginService;
@@ -26,6 +28,10 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.result.WxMpQrCodeTicket;
+import me.zhyd.oauth.AuthRequestBuilder;
+import me.zhyd.oauth.config.AuthConfig;
+import me.zhyd.oauth.model.AuthUser;
+import me.zhyd.oauth.request.AuthRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
@@ -120,6 +126,45 @@ public class WebSocketServiceImpl implements WebSocketService {
         wxMsgService.loginByUserName(userName,code);
     }
 
+
+    Map<String,Channel> tempMap = new ConcurrentHashMap<>();
+    @Autowired
+    private OauthLoginUtils oauthLoginUtils;
+    @Override
+    public void giteeLogin(Channel channel, String data) {
+        AuthRequest authRequest = oauthLoginUtils.buildGiteeAuthRequest();
+        String uuId = UUID.randomUUID().toString().replaceAll("-","");
+        log.info("生成uuid：{}",uuId);
+        String url = authRequest.authorize(uuId);
+        tempMap.put(uuId,channel);
+        WSBaseResp wsBaseResp = new WSBaseResp();
+        wsBaseResp.setType(WSRespTypeEnum.GiteeLoginReponseURl.getType());
+        wsBaseResp.setData(url);
+        this.sendMsg(channel,wsBaseResp);
+    }
+
+    @Override
+    public boolean giteeConfireLogin(String bizCode, AuthUser obj) {
+        Channel channel = tempMap.get(bizCode);
+        if(channel==null){
+            return false;
+        }
+        wxMsgService.loginGitee(channel,obj);
+        tempMap.remove(bizCode);
+        return true;
+    }
+
+    @Override
+    public void sendErrorMsg(Integer chanelCode,String msg) {
+        Channel channel = WAIT_LOGIN_MAP.get(chanelCode);
+        if (Objects.isNull(channel)) {
+            return;
+        }
+        //移除code
+        WAIT_LOGIN_MAP.remove(chanelCode);
+        sendMsg(channel, WSAdapter.buildErrorResp(msg));
+    }
+
     /**
      * 获取不重复的登录的code，微信要求最大不超过int的存储极限
      * 防止并发，可以给方法加上synchronize，也可以使用cas乐观锁
@@ -174,7 +219,7 @@ public class WebSocketServiceImpl implements WebSocketService {
     /**
      * 登录成功，并更新状态
      */
-    private void loginSuccess(Channel channel, User user, String token) {
+    public void loginSuccess(Channel channel, User user, String token) {
         //更新上线列表
         online(channel, user.getId());
         //返回给用户登录成功

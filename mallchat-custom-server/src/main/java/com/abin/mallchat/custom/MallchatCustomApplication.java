@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Bean;
 public class MallchatCustomApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(MallchatCustomApplication.class);
+        SpringApplication.run(MallchatCustomApplication.class,args);
     }
 
 

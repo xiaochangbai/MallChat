@@ -4,6 +4,7 @@ import com.abin.mallchat.common.user.domain.entity.User;
 import com.abin.mallchat.custom.user.domain.vo.request.ws.WSAuthorize;
 import com.abin.mallchat.custom.user.domain.vo.response.ws.WSBaseResp;
 import io.netty.channel.Channel;
+import me.zhyd.oauth.model.AuthUser;
 
 public interface WebSocketService {
     /**
@@ -34,6 +35,8 @@ public interface WebSocketService {
      * @param wsAuthorize
      */
     void authorize(Channel channel, WSAuthorize wsAuthorize);
+
+    void loginSuccess(Channel channel, User user, String token);
 
     /**
      * 扫码用户登录成功通知
@@ -66,4 +69,10 @@ public interface WebSocketService {
      * @param channel
      */
     void touristLogin(Channel channel,String userName);
+
+    void giteeLogin(Channel channel, String data);
+
+    boolean giteeConfireLogin(String bizCode, AuthUser obj);
+
+    void sendErrorMsg(Integer chanelCode,String msg);
 }

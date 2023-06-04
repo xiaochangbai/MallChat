@@ -37,6 +37,7 @@ import com.abin.mallchat.custom.chat.service.adapter.MemberAdapter;
 import com.abin.mallchat.custom.chat.service.adapter.MessageAdapter;
 import com.abin.mallchat.custom.chat.service.adapter.RoomAdapter;
 import com.abin.mallchat.custom.chat.service.helper.ChatMemberHelper;
+import com.github.houbb.sensitive.word.core.SensitiveWordHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,11 +81,20 @@ public class ChatServiceImpl implements ChatService {
      */
     @Override
     public Long sendMsg(ChatMessageReq request, Long uid) {
+
+        //敏感词替换
+        String result = SensitiveWordHelper.replace(request.getContent());
+        if(result.matches("^\\*+$")){
+            throw new BusinessException("该文本暂不支持发送");
+        }
+        request.setContent(result);
+
         Long Mid = SpringContextHolder.getBean(this.getClass()).saveMsg(request, uid);
         //发布消息发送事件
         applicationEventPublisher.publishEvent(new MessageSendEvent(this, Mid));
         return Mid;
     }
+
 
     /**
      * 保存消息

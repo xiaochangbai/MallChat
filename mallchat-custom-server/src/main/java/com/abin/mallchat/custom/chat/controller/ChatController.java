@@ -64,7 +64,7 @@ public class ChatController {
         return userCache.getBlackMap().getOrDefault(BlackTypeEnum.UID.getType(), new HashSet<>());
     }
 
-    @GetMapping("public/member/statistic/")
+    @GetMapping("public/member/statistic")
     @ApiOperation("群成员人数统计")
     public ApiResult<ChatMemberStatisticResp> getMemberStatistic() {
         return ApiResult.success(chatService.getMemberStatistic());
@@ -72,7 +72,7 @@ public class ChatController {
 
     @GetMapping("/public/msg/page")
     @ApiOperation("消息列表")
-    public ApiResult<CursorPageBaseResp<ChatMessageResp>> getMsgPage(ChatMessagePageReq request) {
+    public ApiResult<CursorPageBaseResp<ChatMessageResp>> getMsgPage(@Valid ChatMessagePageReq request) {
         CursorPageBaseResp<ChatMessageResp> msgPage = chatService.getMsgPage(request, RequestHolder.get().getUid());
         filterBlackMsg(msgPage);
         return ApiResult.success(msgPage);
